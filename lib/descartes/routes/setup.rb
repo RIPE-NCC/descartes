@@ -2,7 +2,13 @@ module Descartes
   class Web < Sinatra::Base
 
     configure do
-      enable :logging if Config.rack_env.eql?("production")
+      $logger = Logger.new(STDOUT)
+      enable :logging
+
+      # seems to be a bug in Rack::Protection
+      # (http://stackoverflow.com/questions/10509774/sinatra-and-rack-protection-setting)
+      set :protection, :except => [:json_csrf]
+      
       disable :raise_errors if Config.rack_env.eql?("production")
       disable :show_exceptions if Config.rack_env.eql?("production")
       use Rack::SslEnforcer if Config.force_https
